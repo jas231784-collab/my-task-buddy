@@ -1,7 +1,7 @@
 import { memo, useState, useRef, useEffect } from 'react';
 import { MoreHorizontal, Pencil, Trash2, Calendar, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Task, Priority } from '@/types/task';
+import { Task, Priority, TASK_CATEGORIES } from '@/types/task';
 import { useTasks } from '@/contexts/TaskContext';
 import { TagBadge } from './TagBadge';
 import { PriorityBadge } from './PriorityBadge';
@@ -43,7 +43,7 @@ export const TaskCard = memo(function TaskCard({
   onEdit,
   onDelete,
 }: TaskCardProps) {
-  const { toggleTask, tags, setSelectedTag } = useTasks();
+  const { toggleTask, tags, setSelectedTag, setSelectedCategory } = useTasks();
   const [isAnimating, setIsAnimating] = useState(false);
 
   const handleToggle = () => {
@@ -55,6 +55,7 @@ export const TaskCard = memo(function TaskCard({
   };
 
   const taskTags = tags.filter(tag => task.tags.includes(tag.id));
+  const categoryInfo = TASK_CATEGORIES.find(c => c.id === (task.category ?? 'personal')) ?? TASK_CATEGORIES[1];
 
   return (
     <div
@@ -69,13 +70,13 @@ export const TaskCard = memo(function TaskCard({
       {/* Priority Indicator */}
       <div className={cn('priority-indicator', `priority-${task.priority}`)} />
       
-      {/* Checkbox */}
-      <div className="flex items-start pt-0.5">
+      {/* Checkbox — larger tap target on mobile (44px) */}
+      <div className="flex items-center justify-center pt-0.5 min-h-[44px] min-w-[44px] -ml-1 md:min-h-0 md:min-w-0 md:justify-start md:pt-0.5">
         <Checkbox
           checked={task.completed}
           onCheckedChange={handleToggle}
           className={cn(
-            'h-5 w-5 rounded-full transition-all duration-200',
+            'h-6 w-6 rounded-full transition-all duration-200 md:h-5 md:w-5',
             task.completed && 'animate-check'
           )}
           aria-label={task.completed ? 'Отметить как невыполненное' : 'Отметить как выполненное'}
@@ -98,10 +99,10 @@ export const TaskCard = memo(function TaskCard({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
-                className="flex-shrink-0 rounded-md p-1.5 text-muted-foreground opacity-0 transition-all hover:bg-muted hover:text-foreground focus:opacity-100 group-hover:opacity-100 focus-ring"
+                className="flex-shrink-0 rounded-md min-h-[44px] min-w-[44px] p-2.5 md:p-1.5 text-muted-foreground opacity-0 transition-all hover:bg-muted hover:text-foreground focus:opacity-100 group-hover:opacity-100 group-focus-within:opacity-100 focus-ring touch-manipulation"
                 aria-label="Действия с задачей"
               >
-                <MoreHorizontal className="h-4 w-4" />
+                <MoreHorizontal className="h-5 w-5 md:h-4 md:w-4" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
@@ -131,8 +132,13 @@ export const TaskCard = memo(function TaskCard({
           </p>
         )}
 
-        {/* Meta row: Tags, Priority, Deadline */}
+        {/* Meta row: Category, Tags, Priority, Deadline */}
         <div className="flex flex-wrap items-center gap-2">
+          <TagBadge
+            name={categoryInfo.name}
+            color={categoryInfo.color}
+            onClick={() => setSelectedCategory(categoryInfo.id)}
+          />
           {taskTags.map(tag => (
             <TagBadge
               key={tag.id}

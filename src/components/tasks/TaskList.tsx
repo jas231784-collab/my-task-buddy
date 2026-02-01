@@ -81,9 +81,9 @@ export function TaskList() {
       <main className="flex-1 flex flex-col min-w-0">
         <TaskHeader onMenuClick={() => setSidebarOpen(true)} />
 
-        {/* Task List */}
-        <div className="flex-1 overflow-y-auto p-4 lg:p-6">
-          <div className="mx-auto max-w-3xl">
+        {/* Task List — full width on < 768px, max-w-3xl from md */}
+        <div className="flex-1 overflow-y-auto px-3 py-4 sm:px-4 lg:p-6">
+          <div className="w-full md:max-w-3xl md:mx-auto">
             {filteredTasks.length === 0 ? (
               <EmptyState type={getEmptyType()} onAddTask={handleAddTask} />
             ) : (
@@ -107,13 +107,13 @@ export function TaskList() {
           </div>
         </div>
 
-        {/* FAB */}
+        {/* FAB — 44px+ tap target, safe area for iPhone/Android */}
         <Button
-          className="fab-button"
+          className="fab-button min-h-[48px] min-w-[48px] h-14 w-14 touch-manipulation"
           onClick={handleAddTask}
           aria-label="Добавить задачу"
         >
-          <Plus className="h-6 w-6" />
+          <Plus className="h-7 w-7 md:h-6 md:w-6" />
         </Button>
       </main>
 

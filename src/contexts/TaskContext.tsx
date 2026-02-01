@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useCallback, useMemo } from 'react';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
-import { Task, Tag, FilterType, SortType, DEFAULT_TAGS, Priority } from '@/types/task';
+import { Task, Tag, FilterType, SortType, DEFAULT_TAGS, Priority, TaskCategory } from '@/types/task';
 
 
 interface TaskContextType {
@@ -10,21 +10,23 @@ interface TaskContextType {
   sort: SortType;
   searchQuery: string;
   selectedTag: string | null;
-  
+  selectedCategory: TaskCategory | null;
+
   addTask: (task: Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'completed'>) => void;
   updateTask: (id: string, updates: Partial<Task>) => void;
   deleteTask: (id: string) => void;
   toggleTask: (id: string) => void;
-  
+
   addTag: (tag: Omit<Tag, 'id'>) => void;
   updateTag: (id: string, updates: Partial<Tag>) => void;
   deleteTag: (id: string) => void;
-  
+
   setFilter: (filter: FilterType) => void;
   setSort: (sort: SortType) => void;
   setSearchQuery: (query: string) => void;
   setSelectedTag: (tagId: string | null) => void;
-  
+  setSelectedCategory: (category: TaskCategory | null) => void;
+
   filteredTasks: Task[];
   stats: {
     total: number;
@@ -53,6 +55,7 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
   const [sort, setSort] = useLocalStorage<SortType>('task-manager-sort', 'createdAt');
   const [searchQuery, setSearchQuery] = useLocalStorage<string>('task-manager-search', '');
   const [selectedTag, setSelectedTag] = useLocalStorage<string | null>('task-manager-selected-tag', null);
+  const [selectedCategory, setSelectedCategory] = useLocalStorage<TaskCategory | null>('task-manager-selected-category', null);
 
   const addTask = useCallback((taskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'completed'>) => {
     const now = new Date().toISOString();
@@ -109,8 +112,16 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
     })));
   }, [setTags, setTasks]);
 
+  const tasksNormalized = useMemo(() =>
+    tasks.map(t => ({
+      ...t,
+      category: (t as Task & { category?: TaskCategory }).category ?? 'personal',
+    })) as Task[],
+    [tasks]
+  );
+
   const filteredTasks = useMemo(() => {
-    let result = [...tasks];
+    let result = [...tasksNormalized];
 
     // Filter by status
     if (filter === 'active') {
@@ -133,6 +144,11 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
       result = result.filter(task => task.tags.includes(selectedTag));
     }
 
+    // Filter by selected category
+    if (selectedCategory) {
+      result = result.filter(task => task.category === selectedCategory);
+    }
+
     // Sort
     const priorityOrder: Record<Priority, number> = { high: 0, medium: 1, low: 2 };
     
@@ -152,20 +168,20 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
     });
 
     return result;
-  }, [tasks, filter, searchQuery, selectedTag, sort]);
+  }, [tasksNormalized, filter, searchQuery, selectedTag, selectedCategory, sort]);
 
   const stats = useMemo(() => {
-    const total = tasks.length;
-    const completed = tasks.filter(t => t.completed).length;
+    const total = tasksNormalized.length;
+    const completed = tasksNormalized.filter(t => t.completed).length;
     const active = total - completed;
     const now = new Date();
-    const overdue = tasks.filter(t => 
+    const overdue = tasksNormalized.filter(t =>
       !t.completed && t.deadline && new Date(t.deadline) < now
     ).length;
     const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
 
     return { total, completed, active, overdue, percentage };
-  }, [tasks]);
+  }, [tasksNormalized]);
 
   const value: TaskContextType = {
     tasks,
@@ -174,6 +190,7 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
     sort,
     searchQuery,
     selectedTag,
+    selectedCategory,
     addTask,
     updateTask,
     deleteTask,
@@ -185,6 +202,7 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
     setSort,
     setSearchQuery,
     setSelectedTag,
+    setSelectedCategory,
     filteredTasks,
     stats,
   };

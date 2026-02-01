@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { X, Calendar as CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Task, Priority, PRIORITY_LABELS, Tag } from '@/types/task';
+import { Task, Priority, PRIORITY_LABELS, Tag, TaskCategory, CATEGORY_LABELS } from '@/types/task';
 import { useTasks } from '@/contexts/TaskContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -21,6 +22,13 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerFooter,
+} from '@/components/ui/drawer';
 import { Calendar } from '@/components/ui/calendar';
 import {
   Popover,
@@ -37,12 +45,16 @@ interface TaskFormProps {
   task?: Task | null;
 }
 
+const FORM_ID = 'task-form';
+
 export function TaskForm({ open, onOpenChange, task }: TaskFormProps) {
   const { addTask, updateTask, tags } = useTasks();
-  
+  const isMobile = useIsMobile();
+
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState<Priority>('medium');
+  const [category, setCategory] = useState<TaskCategory>('personal');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [deadline, setDeadline] = useState<Date | undefined>(undefined);
   const [errors, setErrors] = useState<{ title?: string }>({});
@@ -54,12 +66,14 @@ export function TaskForm({ open, onOpenChange, task }: TaskFormProps) {
         setTitle(task.title);
         setDescription(task.description);
         setPriority(task.priority);
+        setCategory(task.category ?? 'personal');
         setSelectedTags(task.tags);
         setDeadline(task.deadline ? new Date(task.deadline) : undefined);
       } else {
         setTitle('');
         setDescription('');
         setPriority('medium');
+        setCategory('personal');
         setSelectedTags([]);
         setDeadline(undefined);
       }
@@ -79,6 +93,7 @@ export function TaskForm({ open, onOpenChange, task }: TaskFormProps) {
       title: title.trim(),
       description: description.trim(),
       priority,
+      category,
       tags: selectedTags,
       deadline: deadline ? deadline.toISOString() : null,
     };
@@ -100,16 +115,10 @@ export function TaskForm({ open, onOpenChange, task }: TaskFormProps) {
     );
   };
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>
-            {task ? 'Редактировать задачу' : 'Новая задача'}
-          </DialogTitle>
-        </DialogHeader>
+  const formTitle = task ? 'Редактировать задачу' : 'Новая задача';
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+  const formFields = (
+    <>
           {/* Title */}
           <div className="space-y-2">
             <Label htmlFor="title">Название *</Label>
@@ -157,6 +166,31 @@ export function TaskForm({ open, onOpenChange, task }: TaskFormProps) {
                         value === 'low' && 'bg-priority-low',
                         value === 'medium' && 'bg-priority-medium',
                         value === 'high' && 'bg-priority-high',
+                      )} />
+                      {label}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Category */}
+          <div className="space-y-2">
+            <Label>Категория</Label>
+            <Select value={category} onValueChange={(v) => setCategory(v as TaskCategory)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {(Object.entries(CATEGORY_LABELS) as [TaskCategory, string][]).map(([value, label]) => (
+                  <SelectItem key={value} value={value}>
+                    <div className="flex items-center gap-2">
+                      <span className={cn(
+                        'h-2 w-2 rounded-full',
+                        value === 'work' && 'bg-[hsl(var(--category-work))]',
+                        value === 'personal' && 'bg-[hsl(var(--category-personal))]',
+                        value === 'shopping' && 'bg-[hsl(var(--category-shopping))]',
                       )} />
                       {label}
                     </div>
@@ -226,15 +260,49 @@ export function TaskForm({ open, onOpenChange, task }: TaskFormProps) {
               )}
             </div>
           </div>
+    </>
+  );
 
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Отменить
-            </Button>
-            <Button type="submit">
-              {task ? 'Сохранить' : 'Создать'}
-            </Button>
-          </DialogFooter>
+  const footerButtons = (
+    <>
+      <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+        Отменить
+      </Button>
+      <Button type="submit" form={isMobile ? FORM_ID : undefined}>
+        {task ? 'Сохранить' : 'Создать'}
+      </Button>
+    </>
+  );
+
+  if (isMobile) {
+    return (
+      <Drawer open={open} onOpenChange={onOpenChange}>
+        <DrawerContent className="max-h-[90dvh] flex flex-col rounded-t-2xl pb-[env(safe-area-inset-bottom)]">
+          <DrawerHeader className="text-left px-4 pb-2 pt-2">
+            <DrawerTitle>{formTitle}</DrawerTitle>
+          </DrawerHeader>
+          <div className="overflow-y-auto flex-1 px-4 min-h-0">
+            <form id={FORM_ID} onSubmit={handleSubmit} className="space-y-5 pb-6">
+              {formFields}
+            </form>
+          </div>
+          <DrawerFooter className="flex-row gap-2 pt-4 px-4 pb-4 border-t bg-background [&_button]:min-h-[44px] [&_button]:touch-manipulation">
+            {footerButtons}
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle>{formTitle}</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {formFields}
+          <DialogFooter>{footerButtons}</DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

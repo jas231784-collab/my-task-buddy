@@ -47,8 +47,8 @@ export function EmptyState({ type, onAddTask }: EmptyStateProps) {
       <p className="mb-6 max-w-sm text-sm text-muted-foreground">{description}</p>
       
       {showButton && (
-        <Button onClick={onAddTask} className="gap-2">
-          <Plus className="h-4 w-4" />
+        <Button onClick={onAddTask} className="gap-2 min-h-[44px] px-6 py-3 md:min-h-0 md:px-4 md:py-2 touch-manipulation">
+          <Plus className="h-5 w-5 md:h-4 md:w-4" />
           Добавить задачу
         </Button>
       )}

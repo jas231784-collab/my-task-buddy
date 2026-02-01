@@ -4,6 +4,8 @@ export type FilterType = 'all' | 'active' | 'completed';
 
 export type SortType = 'createdAt' | 'priority' | 'deadline';
 
+export type TaskCategory = 'work' | 'personal' | 'shopping';
+
 export interface Tag {
   id: string;
   name: string;
@@ -17,6 +19,7 @@ export interface Task {
   priority: Priority;
   completed: boolean;
   tags: string[];
+  category: TaskCategory;
   deadline: string | null;
   createdAt: string;
   updatedAt: string;
@@ -29,7 +32,20 @@ export interface TasksState {
   sort: SortType;
   searchQuery: string;
   selectedTag: string | null;
+  selectedCategory: TaskCategory | null;
 }
+
+export const TASK_CATEGORIES: { id: TaskCategory; name: string; color: string }[] = [
+  { id: 'work', name: 'Работа', color: 'category-work' },
+  { id: 'personal', name: 'Личное', color: 'category-personal' },
+  { id: 'shopping', name: 'Покупки', color: 'category-shopping' },
+];
+
+export const CATEGORY_LABELS: Record<TaskCategory, string> = {
+  work: 'Работа',
+  personal: 'Личное',
+  shopping: 'Покупки',
+};
 
 export const DEFAULT_TAGS: Tag[] = [
   { id: 'work', name: 'Работа', color: 'tag-work' },

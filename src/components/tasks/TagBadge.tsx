@@ -17,6 +17,9 @@ const colorClasses: Record<string, string> = {
   'tag-urgent': 'bg-tag-urgent/15 text-tag-urgent border-tag-urgent/30',
   'tag-home': 'bg-tag-home/15 text-tag-home border-tag-home/30',
   'tag-study': 'bg-tag-study/15 text-tag-study border-tag-study/30',
+  'category-work': 'bg-[hsl(var(--category-work))]/15 text-[hsl(var(--category-work))] border-[hsl(var(--category-work))]/30',
+  'category-personal': 'bg-[hsl(var(--category-personal))]/15 text-[hsl(var(--category-personal))] border-[hsl(var(--category-personal))]/30',
+  'category-shopping': 'bg-[hsl(var(--category-shopping))]/15 text-[hsl(var(--category-shopping))] border-[hsl(var(--category-shopping))]/30',
 };
 
 export const TagBadge = memo(function TagBadge({

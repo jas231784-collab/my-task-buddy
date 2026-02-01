@@ -33,15 +33,15 @@ export const TaskHeader = memo(function TaskHeader({ onMenuClick }: TaskHeaderPr
   return (
     <header className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex items-center gap-3 p-4">
-        {/* Menu button (mobile) */}
+        {/* Hamburger menu (mobile) — 44px tap target */}
         <Button
           variant="ghost"
           size="icon"
-          className="lg:hidden flex-shrink-0"
+          className="lg:hidden flex-shrink-0 min-h-[44px] min-w-[44px] h-11 w-11 md:h-10 md:w-10"
           onClick={onMenuClick}
           aria-label="Открыть меню"
         >
-          <Menu className="h-5 w-5" />
+          <Menu className="h-6 w-6 md:h-5 md:w-5" />
         </Button>
 
         {/* Search */}
@@ -79,18 +79,18 @@ export const TaskHeader = memo(function TaskHeader({ onMenuClick }: TaskHeaderPr
           </SelectContent>
         </Select>
 
-        {/* Theme toggle */}
+        {/* Theme toggle — 44px tap target on mobile */}
         <Button
           variant="ghost"
           size="icon"
           onClick={toggleTheme}
           aria-label={theme === 'light' ? 'Включить тёмную тему' : 'Включить светлую тему'}
-          className="flex-shrink-0"
+          className="flex-shrink-0 min-h-[44px] min-w-[44px] h-11 w-11 md:h-10 md:w-10"
         >
           {theme === 'light' ? (
-            <Moon className="h-5 w-5" />
+            <Moon className="h-6 w-6 md:h-5 md:w-5" />
           ) : (
-            <Sun className="h-5 w-5" />
+            <Sun className="h-6 w-6 md:h-5 md:w-5" />
           )}
         </Button>
       </div>

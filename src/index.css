@@ -58,6 +58,10 @@
     --tag-urgent: 0 84% 60%;
     --tag-home: 142 76% 36%;
     --tag-study: 38 92% 50%;
+
+    --category-work: 217 91% 60%;
+    --category-personal: 262 83% 58%;
+    --category-shopping: 142 50% 45%;
   }
 
   .dark {
@@ -113,6 +117,10 @@
     --tag-urgent: 0 84% 65%;
     --tag-home: 142 76% 45%;
     --tag-study: 38 92% 55%;
+
+    --category-work: 217 91% 65%;
+    --category-personal: 262 83% 65%;
+    --category-shopping: 142 50% 50%;
   }
 }
 
@@ -173,7 +181,9 @@
   }
 
   .fab-button {
-    @apply fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full shadow-lg transition-all duration-200;
+    @apply fixed z-50 rounded-full shadow-lg transition-all duration-200;
+    bottom: max(1.5rem, env(safe-area-inset-bottom));
+    right: max(1.5rem, env(safe-area-inset-right));
     @apply hover:scale-110 hover:shadow-xl active:scale-95;
     @apply bg-primary text-primary-foreground;
   }

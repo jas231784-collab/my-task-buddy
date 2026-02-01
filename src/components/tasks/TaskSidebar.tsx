@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTasks } from '@/contexts/TaskContext';
-import { FilterType, FILTER_LABELS } from '@/types/task';
+import { FilterType, FILTER_LABELS, TASK_CATEGORIES, TaskCategory } from '@/types/task';
 import { StatsPanel } from './StatsPanel';
 import { TagBadge } from './TagBadge';
 import { Button } from '@/components/ui/button';
@@ -33,6 +33,8 @@ export const TaskSidebar = memo(function TaskSidebar({ isOpen, onClose }: TaskSi
     setFilter, 
     selectedTag, 
     setSelectedTag, 
+    selectedCategory,
+    setSelectedCategory,
     tags, 
     tasks,
     stats
@@ -70,11 +72,11 @@ export const TaskSidebar = memo(function TaskSidebar({ isOpen, onClose }: TaskSi
             <Button
               variant="ghost"
               size="icon"
-              className="lg:hidden"
+              className="lg:hidden min-h-[44px] min-w-[44px] h-11 w-11 touch-manipulation"
               onClick={onClose}
               aria-label="Закрыть меню"
             >
-              <X className="h-5 w-5" />
+              <X className="h-6 w-6" />
             </Button>
           </div>
 
@@ -101,14 +103,14 @@ export const TaskSidebar = memo(function TaskSidebar({ isOpen, onClose }: TaskSi
                       onClose();
                     }}
                     className={cn(
-                      'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors',
+                      'flex w-full items-center gap-3 rounded-lg px-3 py-3 min-h-[44px] md:py-2.5 text-sm transition-colors touch-manipulation',
                       'hover:bg-sidebar-accent focus-ring',
                       filter === key
                         ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
                         : 'text-sidebar-foreground'
                     )}
                   >
-                    <Icon className="h-4 w-4" />
+                    <Icon className="h-5 w-5 md:h-4 md:w-4 shrink-0" />
                     <span className="flex-1 text-left">{FILTER_LABELS[key]}</span>
                     <span className={cn(
                       'rounded-full px-2 py-0.5 text-xs',
@@ -128,9 +130,9 @@ export const TaskSidebar = memo(function TaskSidebar({ isOpen, onClose }: TaskSi
               </h3>
               <button
                 onClick={() => onClose()}
-                className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground transition-colors hover:bg-sidebar-accent focus-ring"
+                className="flex w-full items-center gap-3 rounded-lg px-3 py-3 min-h-[44px] md:py-2.5 text-sm text-sidebar-foreground transition-colors hover:bg-sidebar-accent focus-ring touch-manipulation"
               >
-                <Calendar className="h-4 w-4" />
+                <Calendar className="h-5 w-5 md:h-4 md:w-4 shrink-0" />
                 <span className="flex-1 text-left">Сегодня</span>
                 <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
                   {todayCount}
@@ -138,14 +140,50 @@ export const TaskSidebar = memo(function TaskSidebar({ isOpen, onClose }: TaskSi
               </button>
               <button
                 onClick={() => onClose()}
-                className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground transition-colors hover:bg-sidebar-accent focus-ring"
+                className="flex w-full items-center gap-3 rounded-lg px-3 py-3 min-h-[44px] md:py-2.5 text-sm text-sidebar-foreground transition-colors hover:bg-sidebar-accent focus-ring touch-manipulation"
               >
-                <AlertTriangle className="h-4 w-4 text-destructive" />
+                <AlertTriangle className="h-5 w-5 md:h-4 md:w-4 shrink-0 text-destructive" />
                 <span className="flex-1 text-left">Просрочено</span>
                 <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-xs text-destructive">
                   {stats.overdue}
                 </span>
               </button>
+            </div>
+
+            <Separator />
+
+            {/* Categories */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                  Категории
+                </h3>
+                {selectedCategory && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 px-2 text-xs"
+                    onClick={() => setSelectedCategory(null)}
+                  >
+                    Сбросить
+                  </Button>
+                )}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {TASK_CATEGORIES.map(cat => (
+                  <TagBadge
+                    key={cat.id}
+                    name={cat.name}
+                    color={cat.color}
+                    selected={selectedCategory === cat.id}
+                    onClick={() => {
+                      setSelectedCategory(selectedCategory === cat.id ? null : (cat.id as TaskCategory));
+                      onClose();
+                    }}
+                    size="md"
+                  />
+                ))}
+              </div>
             </div>
 
             <Separator />
